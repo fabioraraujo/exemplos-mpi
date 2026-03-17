@@ -1,0 +1,17 @@
+# Binários compilados
+01_hello_mpi
+02_send_recv
+03_soma_cadeia
+04_calculo_pi
+05_broadcast
+06_scatter_gather
+
+# Objetos
+*.o
+*.dSYM/
+
+# macOS
+.DS_Store
+
+# PDF do material (muito grande para o repositório)
+*.pdf

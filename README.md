@@ -24,6 +24,36 @@ sudo apt install openmpi-bin libopenmpi-dev
 sudo dnf install openmpi openmpi-devel
 ```
 
+**Windows (Microsoft MPI):**
+
+1. Baixe e instale o [Microsoft MPI (MS-MPI)](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi) — instale ambos os arquivos:
+   - `msmpisetup.exe` (runtime)
+   - `msmpisdk.msi` (SDK para desenvolvimento)
+
+2. Após a instalação, verifique se as variáveis de ambiente foram configuradas:
+   ```cmd
+   set MSMPI
+   ```
+   Devem aparecer `MSMPI_BIN`, `MSMPI_INC` e `MSMPI_LIB32`/`MSMPI_LIB64`.
+
+3. Instale o compilador C. Recomendamos o [MinGW-w64](https://www.mingw-w64.org/) via [MSYS2](https://www.msys2.org/):
+   ```bash
+   # No terminal MSYS2
+   pacman -S mingw-w64-x86_64-gcc
+   ```
+
+**Windows (WSL - alternativa recomendada):**
+
+O WSL (Windows Subsystem for Linux) permite usar o ambiente Linux diretamente no Windows:
+```bash
+# 1. Instalar o WSL (PowerShell como administrador)
+wsl --install
+
+# 2. Após reiniciar, no terminal Ubuntu do WSL:
+sudo apt update
+sudo apt install openmpi-bin libopenmpi-dev gcc make
+```
+
 ## Exemplos
 
 | # | Arquivo | Conceito | Funções MPI |
@@ -35,7 +65,9 @@ sudo dnf install openmpi openmpi-devel
 | 5 | `05_broadcast.c` | Broadcast de configuração | `MPI_Bcast` |
 | 6 | `06_scatter_gather.c` | Distribuição e coleta de dados | `MPI_Scatter`, `MPI_Gather` |
 
-## Compilação
+## Compilação e Execução
+
+### Linux / macOS / WSL
 
 Compilar todos os exemplos de uma vez:
 ```bash
@@ -52,8 +84,6 @@ Limpar binários:
 make clean
 ```
 
-## Execução
-
 Executar com N processos usando `mpiexec`:
 ```bash
 mpiexec -np 4 ./01_hello_mpi
@@ -65,6 +95,27 @@ mpiexec -np 4 ./06_scatter_gather
 ```
 
 > **Nota:** O exemplo `02_send_recv.c` requer no mínimo 2 processos.
+
+### Windows (MS-MPI + MinGW-w64)
+
+Compilar um exemplo (Prompt de Comando ou PowerShell):
+```cmd
+gcc -Wall -O2 -I"%MSMPI_INC%" -o 01_hello_mpi.exe 01_hello_mpi.c -L"%MSMPI_LIB64%" -lmsmpi
+```
+
+> **Nota:** Para o exemplo `04_calculo_pi.c`, adicione `-lm` ao final do comando.
+
+Executar com N processos:
+```cmd
+mpiexec -np 4 01_hello_mpi.exe
+mpiexec -np 2 02_send_recv.exe
+mpiexec -np 4 03_soma_cadeia.exe
+mpiexec -np 4 04_calculo_pi.exe
+mpiexec -np 4 05_broadcast.exe
+mpiexec -np 4 06_scatter_gather.exe
+```
+
+> **Dica:** Se `mpiexec` não for reconhecido, adicione `%MSMPI_BIN%` ao `PATH` do sistema ou use o caminho completo: `"C:\Program Files\Microsoft MPI\Bin\mpiexec.exe"`.
 
 ## Descrição dos Exemplos
 
@@ -89,7 +140,7 @@ Demonstra operações coletivas de distribuição e coleta. `MPI_Scatter` divide
 ## Estrutura do Projeto
 
 ```
-scripts/
+exemplos-mpi/
 ├── 01_hello_mpi.c
 ├── 02_send_recv.c
 ├── 03_soma_cadeia.c
